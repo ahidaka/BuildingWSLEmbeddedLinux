@@ -86,15 +86,15 @@ git config --global user.email username@domain.name
 ### ソースコード入手
 
 ```sh
-mkdir ~/imx-yocto-bsp
-cd ~/imx-yocto-bsp
-repo init -u https://github.com/nxp-imx/imx-manifest -b imx-linux-mickledore -m imx-6.1.22-2.0.0.xml
+$ mkdir ~/imx-yocto-bsp
+$ cd ~/imx-yocto-bsp
+$ repo init -u https://github.com/nxp-imx/imx-manifest -b imx-linux-mickledore -m imx-6.1.22-2.0.0.xml
 ```
 
 ### 同期
 
 ```sh
-$ sync
+$ repo sync
 ```
 
 6分ぐらい時間がかかります。
@@ -118,10 +118,13 @@ $ MACHINE=maaxboard-8ulp source sources/meta-maaxboard/tools/maaxboard-setup.sh 
 ここで conf を編集して以下を追加
 
 ```sh
-cat >> conf/local.conf
+$ cat >> conf/local.conf
 BB_NUMBER_THREADS = "8"
 PARALLEL_MAKE = "-j 8"
+BB_SERVER_TIMEOUT = "600"
 ```
+
+local.conf の確認用
 
 //~/imx-yocto-bsp/maaxboard-8ulp/build/conf/local.conf
 
