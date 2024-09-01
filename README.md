@@ -6,10 +6,10 @@ Building an Embedded Linux Environment Using WSL
 
 Linuxデバイス・ドライバ開発入門 環境構築方法の解説
 
-WSL2 Ubuntu-20.04 を使用する デバイス・ドライバ開発ハンズオンセミナー配布用のWSL2イメージを作成する手順を示します。
+WSL2 Ubuntu-20.04 を使用する デバイス・ドライバ開発ハンズオンセミナ配布用のWSL2イメージを作成する手順を示します。
 
-これはハンズオンセミナー受講者用の解説ではありません。
-受講者用のセミナー環境を準備するための環境構築に必要な手順の説明です。
+これはハンズオンセミナ受講者用の解説ではありません。
+受講者用のセミナ環境を準備するための環境構築に必要な手順の説明です。
 
 ## 準備
 
@@ -207,6 +207,12 @@ $ ./aarch64-none-linux-gnu-gcc -v
 ```
 
 ```sh
+...
+一部省略
+...
+in for the A-profile Architecture 10.3-2021.07 (arm-10.29)'
+Thread model: posix
+Supported LTO compression algorithms: zlib
 gcc version 10.3.1 20210621 (GNU Toolchain for the A-profile Architecture 10.3-2021.07 (arm-10.29))
 ```
 
