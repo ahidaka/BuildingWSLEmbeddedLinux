@@ -232,12 +232,31 @@ $ cd ~/imx-yocto-bsp
 $ source sources/poky/oe-init-build-env maaxboard-8ulp/build
 ```
 
-SDK のビルド
+SDK のビルド。時間がかかります。
 ```sh
 bitbake core-image-minimal -c populate_sdk
 ```
 
-SDKのビルドはこれで完了です。
+完了後以下の
+```
+~/imx-yocto-bsp/maaxboard-8ulp/build/tmp/deploy/sdk/
+fsl-imx-wayland-lite-glibc-x86_64-avnet-image-full-armv8a-maaxboard-8ulp-toolchain-6.1-mickledore.sh
+```
+
+が作成されるので、これを実行します。
+```sh
+$ sudo ~/imx-yocto-bsp/maaxboard-8ulp/build/tmp/deploy/sdk/fsl-imx-wayland-lite-glibc-x86_64-avnet-image-full-armv8a-maaxboard-8ulp-toolchain-6.1-mickledore.sh
+```
+
+少し時間がかかり、途中でPATHの変更と確認を求められます。完了後は、
+```
+SDK has been successfully set up and is ready to be used.
+
+Each time you wish to use the SDK in a new shell session, you need to source the environment setup script e.g.
+ $ . /opt/fsl-imx-wayland-lite/6.1-mickledore/environment-setup-armv8a-poky-linux
+```
+
+のメッセージを確認してSDKのビルドはこれで完了です。
 
 ### カーネルビルド
 
