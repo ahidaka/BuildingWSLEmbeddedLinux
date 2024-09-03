@@ -222,7 +222,6 @@ gcc version 10.3.1 20210621 (GNU Toolchain for the A-profile Architecture 10.3-2
 #### SDK
 
 SDK ビルド環境の設定
-
 ```sh
 $ TOOLCHAIN_PATH=$HOME/toolchain/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin
 $ export PATH=$TOOLCHAIN_PATH:$PATH
@@ -234,28 +233,35 @@ $ source sources/poky/oe-init-build-env maaxboard-8ulp/build
 ```
 
 SDK のビルド
-
 ```sh
 bitbake core-image-minimal -c populate_sdk
 ```
 
+SDKのビルドはこれで完了です。
+
 ### カーネルビルド
 
+ホームディレクトリに戻ってから作業します。
 ```sh
 $ cd
 ```
 
-
+カーネルツリーをcloneします。
 ```sh
 $ git clone https://github.com/Avnet/linux-imx.git -b maaxboard_lf-6.1.22-2.0.0
 ```
 
+ビルド実行前のパスの確認です。
 ```sh
 $ echo $CROSS_COMPILE $ARCH
 ```
 
+以下の様に表示されます。
+```sh
 aarch64-none-linux-gnu- arm64
+```
 
+カーネルのビルド実行。時間がかかります。
 ```sh
 $ cd linux-imx
 $ make distclean
@@ -263,23 +269,31 @@ $ make maaxboard-8ulp_defconfig
 $ make -j4
 ```
 
+次のメッセージを確認して終了します。
+```sh
 Execute the ‘ls’ command to view the Image and dtb files after compilation.
+```
 
+ビルドしたファイルを確認します。
 ```sh
 $ ls arch/arm64/boot/Image
 $ ls arch/arm64/boot/dts/freescale/maaxboard*dtb
+```
+
+次のファイルが表示されます。
+```sh
 arch/arm64/boot/dts/freescale/maaxboard-8ulp.dtb
+arch/arm64/boot/dts/freescale/maaxboard-mini.dtb
+arch/arm64/boot/dts/freescale/maaxboard.dtb
 ```
 
-train@Rie:~/linux-imx$ ls arch/arm64/boot/dts/freescale/maaxboard*dtb
-arch/arm64/boot/dts/freescale/maaxboard-8ulp.dtb  arch/arm64/boot/dts/freescale/maaxboard-mini.dtb  arch/arm64/boot/dts/freescale/maaxboard.dtb
-train@Rie:~/linux-imx$
-```
-
+モジュールのビルドを実行します。
 ```sh
 $ make modules
 $ make modules_install INSTALL_MOD_PATH=./rootfs
 ```
+
+WSL用イメージの作成は、ここまでで完了です。
 
 ## 環境検証
 
