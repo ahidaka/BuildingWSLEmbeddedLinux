@@ -23,32 +23,51 @@ WSL2インストール前に、Cドライブに 200GB 程度の空き容量が�
 
 ## ハードウェア環境
 
-環境A：Core i5 6600 / 4コア 4スレッド / 16GB / SSD : bitbake エラー発生
+環境A：Core i5 6600 / 4コア 4スレッド / 16GB / SSD : bitbake 開始後直ぐに、エラー発生
 環境B：Ryzen7 5700X / 8コア 16スレッド / 32GB / M.2 Gen3x4  : bitbake 30分程度で終了
+環境C：Core i3 4160 / 4コア 4スレッド / 16GB / M.2 Gen3x4 : bitbake 282分後 エラー発生
+環境B：Ryzen5 5600G / 6コア 12スレッド / 16GB / M.2 Gen3x4  : bitbake 84分程度で終了
 
 ### WSL環境のインストールと構築
 
 ```cmd
-wsl -l -v
-wsl --list --online
+> wsl -l -v
+> wsl --list --online
 
-wsl --update
-wsl --instal Ubuntu-20.04
-wsl --set-default-version 2
-wsl --set-default Ubuntu-20.04
+> wsl --update
+> wsl --install Ubuntu-20.04
+> wsl --set-default-version 2
+> wsl --set-default Ubuntu-20.04
 ```
 
 - アカウント作成
   - Ubuntu 標準アカウント名
     train/cq
 
-  - 予備のアカウント
+  - 予備のアカウント追加
     maaxboard/avnet
 
 ```sh
+$ sudo -i
 # adduser maaxboard
-# passwd maaxboard
+  passwd? avnet
+  以下 Enter
+  Is the information correct? [Y/n] Y
 # usermod -aG sudo maaxboard
+```
+
+- パスワード無し設定
+
+  **train  ALL=NOPASSWD: ALL** 行を追加します。
+```sh
+$ sudo -i
+# visudo
+...
+（一部省略）
+%sudo   ALL=(ALL:ALL) ALL
+train  ALL=NOPASSWD: ALL
+
+# See sudoers(5) for more information on "#include" directives:
 ```
 
 ## Maaxboard Yocto Project環境構築
@@ -70,7 +89,7 @@ $ sudo apt install -y emacs-nox
 $ sudo apt install -y net-tools
 ```
 
-（ほかにある場合はここに追記）
+（ほかにインストールがある場合はここに追記）
 
 ### ツールのインストール
 
@@ -97,17 +116,22 @@ $ chmod a+x ~/bin/repo
 $ export PATH=~/bin:$PATH
 ```
 
+GitHub アカウント登録です。ご自身のアカウントで設定してください。
+
 ```sh
 git config --global user.name username
 git config --global user.email username@domain.name
 ```
 
-### Yocto ソースコード入手
+### Yocto Project ソースコード入手
 
 ```sh
 $ mkdir ~/imx-yocto-bsp
 $ cd ~/imx-yocto-bsp
 $ repo init -u https://github.com/nxp-imx/imx-manifest -b imx-linux-mickledore -m imx-6.1.22-2.0.0.xml
+...
+一部省略
+Enable color display in this user account (y/N)? Y
 ```
 
 ### 同期
@@ -150,12 +174,12 @@ BB_SERVER_TIMEOUT = "600"
 
 ### local.conf の確認
 
-パラメータ追加編集したlocal.conf 全体を確認します。
+念のため、パラメータ追加編集したlocal.conf 全体を確認します。
 必要があればエディタ（以下の場合はemacs）で編集します
 
 ```sh
-cat ~/imx-yocto-bsp/maaxboard-8ulp/build/conf/local.conf
-emacs conf/local.conf
+$ cat ~/imx-yocto-bsp/maaxboard-8ulp/build/conf/local.conf
+必要な場合は編集： emacs conf/local.conf
 ```
 
 ### ビルド
@@ -164,20 +188,22 @@ bitbake コマンドでYocto Project をビルドします。
 時間がかかるので、time コマンドで計測します。
 
 ```sh
-time bitbake core-image-minimal
+$ time bitbake core-image-minimal
 ```
 
-#### 注意事項
+#### 補足
 
+参考情報
 ```sh
-$ bitbake avnet-image-full
+//$ bitbake avnet-image-full
 ```
-の手順は容量が大き過ぎて時間がかかる
 
+の手順は容量が大き過ぎて時間がかかります。
 ```sh
-$ bitbake avnet-image-minimal
+//$ bitbake avnet-image-minimal
 ```
-はエラー発生
+
+はエラー発生で使えません。
 
 <br/>
 
@@ -187,22 +213,34 @@ $ bitbake avnet-image-minimal
 
 ### aarch64 クロスコンパイラの入手
 
-https://developer.arm.com/downloads/-/gnu-a
+ Yocto-Development-Guide-V3.1 に記載された gcc コンパイラ version 10.3 ではバージョンが古く不具合があるため
+ version 12.2 をインストールします。入手場所とパッケージ名（tarとディレクトリ名）が異なるので注意が必要です。
 
-から、**gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz** を入手して、
-ホームディレクトリに保存しておきます。名前を間違えないように十分注意が必要です。
+https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
+
+から、
+```
+What's new in 12.2.Rel1
+This release is based on GCC 12.2
+
+x86_64 Linux hosted cross toolchains
+AArch64 GNU/Linux target (aarch64-none-linux-gnu)
+```
+**arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-linux-gnu.tar.xz** を入手して、
+ホームディレクトリに保存しておきます。tar.xz ファイルが多数あるため、名前を間違えないように十分注意が必要です。
 
 以下の手順でダウンロードした tar.xz ファイルを展開します。
 
 ```sh
+$ cd
 $ mkdir ~/toolchain
-$ tar -xJf gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz -C ~/toolchain
+$ tar -xJf arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-linux-gnu.tar.xz -C ~/toolchain
 ```
 
 念のためコンパイラのバージョン表示を確認します。
 
 ```sh
-$ cd toolchain/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin/
+$ cd ~/toolchain/arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-linux-gnu/bin/
 $ ./aarch64-none-linux-gnu-gcc -v
 ```
 
@@ -213,17 +251,17 @@ $ ./aarch64-none-linux-gnu-gcc -v
 in for the A-profile Architecture 10.3-2021.07 (arm-10.29)'
 Thread model: posix
 Supported LTO compression algorithms: zlib
-gcc version 10.3.1 20210621 (GNU Toolchain for the A-profile Architecture 10.3-2021.07 (arm-10.29))
+gcc version 12.2.1 20221205 (Arm GNU Toolchain 12.2.Rel1 (Build arm-12.24))
 ```
 
-と表示されるはずです。
-
+と表示されることを確認します。
 
 #### SDK
 
 SDK ビルド環境の設定
 ```sh
-$ TOOLCHAIN_PATH=$HOME/toolchain/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin
+$ 
+$ TOOLCHAIN_PATH=$HOME/toolchain/arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-linux-gnu/bin
 $ export PATH=$TOOLCHAIN_PATH:$PATH
 $ export ARCH=arm64
 $ export CROSS_COMPILE=aarch64-none-linux-gnu-
@@ -240,15 +278,15 @@ bitbake core-image-minimal -c populate_sdk
 完了後以下の
 ```
 ~/imx-yocto-bsp/maaxboard-8ulp/build/tmp/deploy/sdk/
-fsl-imx-wayland-lite-glibc-x86_64-avnet-image-full-armv8a-maaxboard-8ulp-toolchain-6.1-mickledore.sh
+fsl-imx-wayland-lite-glibc-x86_64-core-image-minimal-armv8a-maaxboard-8ulp-toolchain-6.1-mickledore.sh
 ```
 
 が作成されるので、これを実行します。
 ```sh
-$ sudo ~/imx-yocto-bsp/maaxboard-8ulp/build/tmp/deploy/sdk/fsl-imx-wayland-lite-glibc-x86_64-avnet-image-full-armv8a-maaxboard-8ulp-toolchain-6.1-mickledore.sh
+$ sudo ~/imx-yocto-bsp/maaxboard-8ulp/build/tmp/deploy/sdk/fsl-imx-wayland-lite-glibc-x86_64-core-image-minimal-armv8a-maaxboard-8ulp-toolchain-6.1-mickledore.sh
 ```
 
-少し時間がかかり、途中でPATHの変更と確認を求められます。完了後は、
+少し時間がかかり、途中でPATH設定の確認を求められます。完了後は、
 ```
 SDK has been successfully set up and is ready to be used.
 
@@ -256,7 +294,13 @@ Each time you wish to use the SDK in a new shell session, you need to source the
  $ . /opt/fsl-imx-wayland-lite/6.1-mickledore/environment-setup-armv8a-poky-linux
 ```
 
-のメッセージを確認してSDKのビルドはこれで完了です。
+のメッセージを確認してSDKのビルドは完了です。
+
+この場で、実際に実行しておきます。
+```sh
+$ . /opt/fsl-imx-wayland-lite/6.1-mickledore/environment-setup-armv8a-poky-linux
+```
+
 
 ### カーネルビルド
 
@@ -312,25 +356,69 @@ $ make modules
 $ make modules_install INSTALL_MOD_PATH=./rootfs
 ```
 
-WSL用イメージの作成は、ここまでで完了です。
+これでハンズオン用WSL環境の作成作業は完了です。
+<br/>
+
+## 配布用ファイルイメージの作成
+
+WSLを停止後、仮想ディスクをエクスポート、さらにそれを圧縮してハンズオンで使用する配布用ファイルを作成します。
+
+### 全てのWSLを停止
+
+まず、全てのWSLからログアウトして、コマンドプロンプトで状況を確認します。次の様に **Running** であれば稼働中です。
+```cmd
+> C:\Users\Train>wsl -l -v
+
+  NAME            STATE           VERSION
+* Ubuntu-20.04    Running         2
+```
+
+shutdiwn コマンドで全てのWSLを停止します。
+```cmd
+> wsl --shutdown
+```
+
+再度コマンドプロンプトで状況を確認します。
+```cmd
+>wsl -l -v
+  NAME            STATE           VERSION
+* Ubuntu-20.04    Stopped         2
+```
+
+**Stopped** で、停止を確認しました。
+
+### WSL仮想ディスクのエクスポート
+
+**export** コマンドで、他の Windows PC に WSL仮想ディスクを移送するための tar ファイルを作成します。
+例として、D:\WSL\train01.tar に仮想ディスクイメージを作成する場合は、次の様なコマンドを実行します。
+```cmd
+> wsl --export Ubuntu-20.04 "D:\WSL\train01.tar"
+```
+
+エクスポートする仮想ディスクの tarファイルは、100GB 程度の容量です。少し時間がかかります。
+
+エクスポート完了後は、エクスプローラーをで作成した C:\WSL\train01.tar ファイルを zip ファイルに圧縮します。
+ファイル拡張子が変更されて、train01.zip と変わります。37.1GB の容量です。
+WSL配布用ファイルの作成は、これで完了です。
+<br/>
 
 ## 環境検証
 
-作成したイメージを実際にインポートして動作検証をします。
-受講者が事前準備で行う作業と同じ内容です。
+作成した配布用 zip ファイルを実際にインポートして、動作検証をします。
+以降は、受講者が事前準備で行う作業と同じ内容です。
 
 ### イメージのインポートの実行
 
 Cドライブには、別途用意するインストール用ダウンロードイメージとは別に、インストール用の150GB 程度の空き領域が必要です。
 
-あらかじめ train01.zip (43.6 GB) の圧縮イメージをダウンロードして入手、展開して train01.tar (120.7 GB)を用意しておきます。
+あらかじめ train01.zip (37.1 GB) の圧縮イメージをダウンロードして入手、展開して train01.tar (120.7 GB)を用意しておきます。
 
 Cドライブに必要な 150GB の領域はこれらに含まれません。
 
 次に、コマンドを実行してハンズオン用 WSLイメージを展開します。
 
 ```cmd
-> wsl --import Ubuntu-20.04cq "%LOCALAPPDATA%\CQHandsOn-01" "C:\WSL\train01.tar"
+> wsl --import Ubuntu-20.04cq "%LOCALAPPDATA%\CQHandsOn-01" "D:\WSL\train01.tar"
 ```
 
 ### デフォルトユーザーの設定
