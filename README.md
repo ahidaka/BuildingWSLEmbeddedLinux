@@ -119,8 +119,8 @@ $ export PATH=~/bin:$PATH
 GitHub アカウント登録です。ご自身のアカウントで設定してください。
 
 ```sh
-git config --global user.name username
-git config --global user.email username@domain.name
+$ git config --global user.name username
+$ git config --global user.email username@domain.name
 ```
 
 ### Yocto Project ソースコード入手
@@ -193,7 +193,7 @@ $ time bitbake core-image-minimal
 
 #### 補足
 
-参考情報
+参考情報：
 ```sh
 //$ bitbake avnet-image-full
 ```
@@ -272,7 +272,7 @@ $ source sources/poky/oe-init-build-env maaxboard-8ulp/build
 
 SDK のビルド。時間がかかります。
 ```sh
-bitbake core-image-minimal -c populate_sdk
+$ bitbake core-image-minimal -c populate_sdk
 ```
 
 完了後以下の
@@ -300,7 +300,6 @@ Each time you wish to use the SDK in a new shell session, you need to source the
 ```sh
 $ . /opt/fsl-imx-wayland-lite/6.1-mickledore/environment-setup-armv8a-poky-linux
 ```
-
 
 ### カーネルビルド
 
@@ -380,7 +379,8 @@ shutdiwn コマンドで全てのWSLを停止します。
 
 再度コマンドプロンプトで状況を確認します。
 ```cmd
->wsl -l -v
+> wsl -l -v
+
   NAME            STATE           VERSION
 * Ubuntu-20.04    Stopped         2
 ```
@@ -443,7 +443,7 @@ Cドライブに必要な 150GB の領域はこれらに含まれません。
 上記の様にUbuntu-20.04cq がインストール済でStopped 状態を確認して、デフォルト設定します。
 
 ```cmd
-wsl --set-default Ubuntu-20.04cq
+> wsl --set-default Ubuntu-20.04cq
 ```
 
 #### WSL起動とデフォルトユーザー設定
@@ -472,6 +472,14 @@ wsl.conf 内容確認
 ```sh
 # cat /wsl.conf
 ```
+次の内容になっていることを確認します。
+
+```sh
+[boot]
+systemd=true
+[user]
+default=train
+```
 
 再起動
 
@@ -483,6 +491,63 @@ wsl.conf 内容確認
 
 ```cmd
 > wsl
+```
+### 動作確認
+
+インポート環境の動作を確認します。
+
+#### ネットワークと最新状態の確認
+
+次のコマンドで確認します。
+
+```cmd
+$ sudo apt update
+$ sudo apt upgrade
+```
+
+必要に応じて'Y'入力して更新します。
+
+#### クロスコンパイラの状態の確認
+
+次のコマンドで確認します。
+
+```sh
+$ cd ~/toolchain/arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-linux-gnu/bin/
+$ ./aarch64-none-linux-gnu-gcc -v
+```
+を実行して次の様に表示されることを確認します。
+
+```sh
+...
+一部省略
+...
+in for the A-profile Architecture 10.3-2021.07 (arm-10.29)'
+Thread model: posix
+Supported LTO compression algorithms: zlib
+gcc version 12.2.1 20221205 (Arm GNU Toolchain 12.2.Rel1 (Build arm-12.24))
+```
+
+## ハンズオン環境の動作確認
+
+ここまで実行して、最後の **aarch64-none-linux-gnu-gcc -v** の表示の確認をしてください。
+異常がある場合は作業を見直して、ハンズオン当日までに必ず動作確認をお願いします。
+
+### トラブル対応
+
+イメージインポートにおいて、インポート先のCドライの容量が足りない場合などは、Import操作が終了しません。
+コントロールCでコマンド中断後、%LOCALAPPDATA%\CQHandsOn-01 フォルダーを削除、Cドライブの空き領域を拡張してから、次のコマンドでインストール済ディストリビューションを削除します。
+```cmd
+> wsl --unregister Ubuntu-20.04cq
+```
+その後念のため再起動してから、WSLの停止を確認して再度インポートを実行します。
+
+### 削除
+
+使用しなくなったWSLイメージの削除は前項のトラブル対応とほぼ同じです。
+
+wsl の停止を確認して、%LOCALAPPDATA%\CQHandsOn-01 フォルダーを削除、次のコマンドでインストール済ディストリビューションを削除します。
+```cmd
+> wsl --unregister Ubuntu-20.04cq
 ```
 
 ## 資料
