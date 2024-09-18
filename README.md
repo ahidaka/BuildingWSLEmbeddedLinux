@@ -322,9 +322,10 @@ export CROSS_COMPILE=aarch64-none-linux-gnu-
 #### bitbake 準備
 
 ハンズオンで、頻繫に使用する source コマンド。
-
+```sh
 $ cd ~/imx-yocto-bsp
 $ source sources/poky/oe-init-build-env maaxboard-8ulp/build
+```
 
 ### カーネルビルド
 
