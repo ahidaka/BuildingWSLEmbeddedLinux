@@ -207,9 +207,9 @@ $ time bitbake core-image-minimal
 
 <br/>
 
-## カーネルビルド
+## SDK ビルド
 
-クロスコンパイラとカーネルソースを入手してカーネルをビルド
+クロスコンパイラとカーネルソースを入手しSDKとカーネルをビルド
 
 ### aarch64 クロスコンパイラの入手
 
@@ -256,11 +256,10 @@ gcc version 12.2.1 20221205 (Arm GNU Toolchain 12.2.Rel1 (Build arm-12.24))
 
 と表示されることを確認します。
 
-#### SDK
+### SDKビルド
 
 SDK ビルド環境の設定
 ```sh
-$ 
 $ TOOLCHAIN_PATH=$HOME/toolchain/arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-linux-gnu/bin
 $ export PATH=$TOOLCHAIN_PATH:$PATH
 $ export ARCH=arm64
@@ -300,6 +299,32 @@ Each time you wish to use the SDK in a new shell session, you need to source the
 ```sh
 $ . /opt/fsl-imx-wayland-lite/6.1-mickledore/environment-setup-armv8a-poky-linux
 ```
+
+### SDK再作成とレシピ作成準備
+
+この項はハンズオンで作成するレシピ作成の準備と動作確認。配布用イメージ作成時は不要ですが、便宜的にここに記述します。
+
+#### 環境変数作成
+
+ビルド環境用定義の設定
+```sh
+$ cat > CROSS_ENV 
+```
+ハンズオンで、頻繫に使用する次の環境変数定義を作成します。
+```
+export KDIR=$HOME/imx-yocto-bsp/maaxboard-8ulp/build/tmp/work/maaxboard_8ulp-poky-linux/linux-imx/6.1.22+gitAUTOINC+78ce688d5a-r0/build/
+TOOLCHAIN_PATH=$HOME/toolchain/arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-linux-gnu/bin
+export PATH=$TOOLCHAIN_PATH:$PATH
+export ARCH=arm64
+export CROSS_COMPILE=aarch64-none-linux-gnu-
+```
+
+#### bitbake 準備
+
+ハンズオンで、頻繫に使用する source コマンド。
+
+$ cd ~/imx-yocto-bsp
+$ source sources/poky/oe-init-build-env maaxboard-8ulp/build
 
 ### カーネルビルド
 
